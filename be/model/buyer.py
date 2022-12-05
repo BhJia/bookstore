@@ -149,7 +149,7 @@ class Buyer(db_conn.DBConn):
             # 卖家余额更新
             cursor = self.session.query(user).filter(user.user_id == seller_id).first()
             if cursor == None:
-                return error.error_non_exist_user_id(buyer_id)
+                return error.error_non_exist_user_id(seller_id)
             cursor.balance += total_price
             self.session.add(cursor)
 
