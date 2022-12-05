@@ -75,6 +75,7 @@ class Buyer(db_conn.DBConn):
             status="ordered"
 
             New_order = new_order(order_id=uid, store_id=store_id, user_id=user_id,status="ordered",order_time=time)
+
             # print("New_order",New_order.store_id)
             self.session.add(New_order)
             self.session.commit()
