@@ -73,7 +73,7 @@ class Buyer(db_conn.DBConn):
             time = datetime.now().strftime("%Y-%m-%d %H:%M:%S") # 当前下单时间
             # ordered:已下单未付款 paid: 已付款未发货 delivered:已发货未收货   received:已收货 canceled:已取消
             status="ordered"
-            # 注意更新状态和时间
+
             New_order = new_order(order_id=uid, store_id=store_id, user_id=user_id,status="ordered",order_time=time)
             # print("New_order",New_order.store_id)
             self.session.add(New_order)
