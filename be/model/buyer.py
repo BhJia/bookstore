@@ -11,11 +11,11 @@ from be.model.postgresql import book, user, user_store, store, new_order, new_or
 from sqlalchemy.sql import and_
 import datetime
 
-#======如果不运行自动取消订单，请注释掉以下部分
-#import redis #为了实现自动删除超时订单
-#连接redis数据库
-#r=redis.StrictRedis(host='localhost',port=6379,db=0,decode_responses=True)
 
+# ======如果不运行自动取消订单，请注释掉以下部分
+# import redis #为了实现自动删除超时订单
+# 连接redis数据库
+# r=redis.StrictRedis(host='localhost',port=6379,db=0,decode_responses=True)
 
 
 class Buyer(db_conn.DBConn):
@@ -71,18 +71,17 @@ class Buyer(db_conn.DBConn):
                 # print("stock_level",cursor.stock_level)
                 self.session.add(cursor)
 
-
                 # 更新订单细节表
                 New_order_detail = new_order_detail(order_id=uid, book_id=book_id, count=count, price=price)
                 self.session.add(New_order_detail)
                 print(New_order_detail.order_id)
 
             # 更新订单表
-            time = datetime.now().strftime("%Y-%m-%d %H:%M:%S") # 当前下单时间
+            time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # 当前下单时间
             # ordered:已下单未付款 paid: 已付款未发货 delivered:已发货未收货   received:已收货 canceled:已取消
-            status="ordered"
+            status = "ordered"
 
-            New_order = new_order(order_id=uid, store_id=store_id, user_id=user_id,status="ordered",order_time=time)
+            New_order = new_order(order_id=uid, store_id=store_id, user_id=user_id, status="ordered", order_time=time)
 
             # print("New_order",New_order.store_id)
             self.session.add(New_order)
@@ -149,7 +148,8 @@ class Buyer(db_conn.DBConn):
                 return error.error_not_sufficient_funds(order_id)
 
             # 买家余额更新
-            cursor = self.session.query(user).filter(and_(user.user_id == buyer_id, user.balance >= total_price)).first()
+            cursor = self.session.query(user).filter(
+                and_(user.user_id == buyer_id, user.balance >= total_price)).first()
             if cursor == None:
                 return error.error_not_sufficient_funds(order_id)
             cursor.balance -= total_price
@@ -167,8 +167,8 @@ class Buyer(db_conn.DBConn):
             cursor = self.session.query(new_order).filter(new_order.order_id == order_id)
             if cursor == None:
                 return error.error_invalid_order_id(order_id)
-            cursor.status="paid"
-            cursor.pay_time=time
+            cursor.status = "paid"
+            cursor.pay_time = time
             self.session.add(cursor)
 
             self.session.commit()
@@ -212,171 +212,155 @@ class Buyer(db_conn.DBConn):
 
         return 200, "ok"
 
-    def receive(self, user_id: str, order_id: str):
+    # 收货
+    def receive_order(self, user_id: str, order_id: str):
         try:
             # 判断该用户是否存在
             if not self.user_id_exist(user_id):
                 return error.error_non_exist_user_id(user_id) + (order_id,)
-            print("用户存在")
-            # 判断该订单是否存在在未收货里面
-            row = self.session.query(new_order).filter_by(status="delivered" , order_id=order_id)
-            order = row.first()
-            print("未收货订单", order)
-            if order is None:
+
+            # 判断该订单是否在配送中
+            row = self.session.query(new_order).filter_by(status="delivered", order_id=order_id).first()
+            if row is None:
                 return error.error_invalid_order_id(order_id)
 
-            buyer_id = order.user_id
-            # 判断该用户是否有这个订单。。。。验证收货的人是否正确
+            # 判断用户id和买家id是否一致
+            buyer_id = row.user_id
             if user_id != buyer_id:
                 return error.error_authorization_fail()
 
-            # 有该订单，收货
-            # 添加收货时间
-            #timenow = datetime.now().strftime("%Y-%m-%d %H:%M:%S") 不需要打印收货时间，可以省略
-            print("******已收货")
-            #row.update({new_order.receive_time: timenow})
             self.session.commit()
 
-        except sqlite.Error as e:
+        except SQLAlchemyError as e:
             return 528, "{}".format(str(e))
         except BaseException as e:
             return 530, "{}".format(str(e))
         return 200, "ok"
 
-    # 买家查询
-    # 比较索引 和模糊查询的 检索效率
-
-    def search_history_status(self, buyer_id: str, flag: int):
+    # 历史订单
+    def history_order(self, buyer_id: str, status: str):
         try:
-            #检查用户是否存在
+            # 检查用户是否存在
             if not self.user_id_exist(buyer_id):
-                # print('********')
-                code, mes = error.error_non_exist_user_id(buyer_id)
-                return code, mes, " "
-            # 查所有订单
-            if flag == 0:
-                record_listn = self.session.query(new_order_detail).filter(new_order_detail.buyer_id == buyer_id)
-                print(record_listn)
-                records = []
-                for record in record_listn:
-                    records.append({
-                        "order_id": record.order_id,
-                        "book_id": record.book_id,
-                        "count": record.count,
-                        "price": record.price
-                    })
-                self.session.close()
-                # 未付款
+                return error.error_non_exist_user_id(buyer_id)
 
-            if flag == 1:
-                record_list1 = self.session.query(new_order).filter(new_order.status == "ordered",new_order.user_id == buyer_id,
-                                                                           new_order.order_time != None)
-                print(record_list1)
-                records = []
-                for record in record_list1:
-                    record_infos = self.session.query(new_order_detail).filter_by(order_id=record.order_id).all()
-                    records.append({
-                        "order_id": record.order_id,
-                        #"buyer_id": record.buyer_id,
-                        #"store_id": record.store_id,
-                        "order_time": record.order_time,
-                        "status": '未付款',
+            # 查所有订单
+            if status == "all":
+                all_order = self.session.query(new_order_detail).filter(new_order_detail.buyer_id == buyer_id)
+                order_info = []
+                for order in all_order:
+                    order_info.append({
+                    "order_id": order.order_id,
+                    "book_id": order.book_id,
+                    "count": order.count,
+                    "price": order.price
+                })
+                self.session.close()
+
+            # 已下单未付款
+            if status == "ordered":
+                ordered = self.session.query(new_order).filter(new_order.status == "ordered",
+                                                                    new_order.user_id == buyer_id,
+                                                                    new_order.order_time != None)
+                order_info = []
+                for order in ordered:
+                    info = self.session.query(new_order_detail).filter_by(order_id=order.order_id).all()
+                    order_info.append({
+                        "order_id": order.order_id,
+                        "order_time": order.order_time,
+                        "status": "ordered",
                         "book_list": [
-                            {"book_id": rei.book_id, "count": rei.count, "price": rei.price}
-                            for rei in record_infos
+                            {"book_id": book.book_id, "count": book.count, "price": book.price}
+                            for book in info
                         ]
                     })
                 self.session.close()
-                # 已付款待发货
-            if flag == 2:
-                record_list = self.session.query(new_order).filter(new_order.status == "paid",
-                    new_order.user_id == buyer_id, new_order.pay_time != None)
-                print(record_list)
-                records = []
-                for record in record_list:
-                    record_infos = self.session.query(new_order_detail).filter_by(order_id=record.order_id).all()
-                    records.append({
-                        "order_id": record.order_id,
-                        #"buyer_id": record.buyer_id,
-                        #"store_id": record.store_id,
-                        "pay_time": record.pay_time,
-                        "status": '已付款待发货',
+
+            # 已付款待发货
+            if status == "paid":
+                paid = self.session.query(new_order).filter(new_order.status == "paid",
+                                                                   new_order.user_id == buyer_id,
+                                                                   new_order.pay_time != None)
+                order_info = []
+                for order in paid:
+                    info = self.session.query(new_order_detail).filter_by(order_id=order.order_id).all()
+                    order_info.append({
+                        "order_id": order.order_id,
+                        "pay_time": order.pay_time,
+                        "status": 'paid',
                         "book_list": [
-                            {"book_id": rei.book_id, "count": rei.count, "price": rei.price}
-                            for rei in record_infos
+                            {"book_id": book.book_id, "count": book.count, "price": book.price}
+                            for book in info
                         ]
                     })
                 self.session.close()
-            # 已发货待收货
-            if flag == 3:
-                record_list2 = self.session.query(new_order).filter(new_order.status == "delivered" ,
-                    new_order.user_id == buyer_id)
-                print(record_list2)
-                records = []
-                for record in record_list2:
-                    record_infos = self.session.query(new_order_detail).filter_by(order_id=record.order_id).all()
-                    records.append({
-                        "order_id": record.order_id,
-                        #"buyer_id": record.buyer_id,
-                        #"store_id": record.store_id,
-                        #"purchase_time": record.purchase_time,
-                        "status": '已发货待收货',
+
+            # 已发货未收货
+            if status == "delivered":
+                delivered = self.session.query(new_order).filter(new_order.status == "delivered",
+                                                                    new_order.user_id == buyer_id)
+                order_info = []
+                for order in delivered:
+                    info = self.session.query(new_order_detail).filter_by(order_id=order.order_id).all()
+                    order_info.append({
+                        "order_id": order.order_id,
+                        "status": 'delivered',
                         "book_list": [
-                            {"book_id": rei.book_id, "count": rei.count, "price": rei.price}
-                            for rei in record_infos
+                            {"book_id": book.book_id, "count": book.count, "price": book.price}
+                            for book in info
                         ]
                     })
                 self.session.close()
+
             # 已收货
-            if flag == 4:
-                record_list3 = self.session.query(new_order).filter(new_order.status == "received" ,
-                    new_order.user_id == buyer_id)
-                print(record_list3)
-                records = []
-                for record in record_list3:
-                    record_infos = self.session.query(new_order_detail).filter_by(order_id=record.order_id).all()
-                    records.append({
-                        "order_id": record.order_id,
-                        #"buyer_id": record.buyer_id,
-                        #"store_id": record.store_id,
-                        #"receive_time": record.receive_time,
-                        "status": '已收货',
+            if status == "received":
+                received = self.session.query(new_order).filter(new_order.status == "received",
+                                                                    new_order.user_id == buyer_id)
+                order_info = []
+                for order in received:
+                    info = self.session.query(new_order_detail).filter_by(order_id=order.order_id).all()
+                    order_info.append({
+                        "order_id": order.order_id,
+                        "status": 'received',
                         "book_list": [
-                            {"book_id": rei.book_id, "count": rei.count, "price": rei.price}
-                            for rei in record_infos
+                            {"book_id": book.book_id, "count": book.count, "price": book.price}
+                            for book in info
                         ]
                     })
                 self.session.close()
-            if flag == 5:
-                record_list4 = self.session.query(new_order).filter(new_order.status == "canceled",new_order.user_id == buyer_id,
-                                                                             new_order.cancel_time != None)
-                print(record_list4)
-                records = []
-                for record in record_list4:
-                    record_infos = self.session.query(new_order_detail).filter_by(order_id=record.order_id).all()
-                    records.append({
-                        "order_id": record.order_id,
-                        #"buyer_id": record.buyer_id,
-                        #"store_id": record.store_id,
-                        #"cancel_time": record.cancel_time,
+
+            # 取消的订单
+            if status == "canceled":
+                canceled = self.session.query(new_order).filter(new_order.status == "canceled",
+                                                                    new_order.user_id == buyer_id,
+                                                                    new_order.cancel_time != None)
+                order_info = []
+                for order in canceled:
+                    info = self.session.query(new_order_detail).filter_by(order_id=order.order_id).all()
+                    order_info.append({
+                        "order_id": order.order_id,
                         "status": '已取消',
                         "book_list": [
-                            {"book_id": rei.book_id, "count": rei.count, "price": rei.price}
-                            for rei in record_infos
+                            {"book_id": book.book_id, "count": book.count, "price": book.price}
+                            for book in info
                         ]
                     })
                 self.session.close()
+        except SQLAlchemyError as e:
+            return 528, "{}".format(str(e))
         except BaseException as e:
             return 530, "{}".format(str(e)), []
-        return 200, "ok", records
+        return 200, "ok", order_info
 
+    # 取消订单
     def cancel(self, buyer_id: str, order_id: str):
         if not self.user_id_exist(buyer_id):
-            code,mes =error.error_non_exist_user_id(buyer_id)
-            return code ,mes
-        #是否属于未付款订单
-        store=self.session.query(new_order).filter(new_order.status == "ordered", new_order.user_id == buyer_id , new_order.order_id == order_id,
-                                                   new_order.order_time != None).first()
+            return error.error_non_exist_user_id(buyer_id)
+
+        # 是否属于未付款订单
+        store = self.session.query(new_order).filter(new_order.status == "ordered", new_order.user_id == buyer_id,
+                                                     new_order.order_id == order_id,
+                                                     new_order.order_time != None).first()
         if store == None:
             # 是否属于已付款且未发货订单
             order1 = self.session.query(new_order).filter(new_order.status == "paid", new_order.order_id == order_id,
@@ -413,17 +397,17 @@ class Buyer(db_conn.DBConn):
             price = store.price
             store.status = "canceled"
 
-
-        cancel_order = new_order(order_id=order_id , user_id=buyer_id,store_id=store_id,  price=price,status = "canceled")
+        cancel_order = new_order(order_id=order_id, user_id=buyer_id, store_id=store_id, price=price, status="canceled")
         if cancel_order == None:
             return error.error_not_sufficient_funds(order_id)
         self.session.add(cancel_order)
         self.session.commit()
 
-        #加库存
+        # 加库存
         store = self.session.query(new_order).filter_by(store_id=store_id)
-        stores=store.first()
-        cursor = self.session.query(new_order_detail).filter(new_order_detail.order_id == order_id , new_order_detail.book_id ==
+        stores = store.first()
+        cursor = self.session.query(new_order_detail).filter(new_order_detail.order_id == order_id,
+                                                             new_order_detail.book_id ==
                                                              stores.book_id).first()
 
         count = cursor.count
@@ -435,8 +419,7 @@ class Buyer(db_conn.DBConn):
         self.session.commit()
         self.session.close()
         return 200, 'ok'
-    #def test_auto_cancel(self, order_id: str):
-
+    # def test_auto_cancel(self, order_id: str):
 
     # EXPLAIN ANALYZE SELECT DISTINCT book_id FROM search_book_intro  WHERE tsv_column @@ '美丽' LIMIT 100
-    #def search_functions_limit(self, store_id: str, search_type: str, search_input: str, field: str) -> (int, [dict]):
+    # def search_functions_limit(self, store_id: str, search_type: str, search_input: str, field: str) -> (int, [dict]):
