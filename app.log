@@ -1,0 +1,96 @@
+INFO:werkzeug: * Running on http://127.0.0.1:5000 (Press CTRL+C to quit)
+INFO:werkzeug:127.0.0.1 - - [28/Nov/2022 10:11:13] "[33mGET / HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [28/Nov/2022 10:11:13] "[33mGET / HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [28/Nov/2022 10:11:13] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [28/Nov/2022 10:11:22] "[33mGET / HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [28/Nov/2022 10:11:22] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug: * Running on http://127.0.0.1:5000 (Press CTRL+C to quit)
+INFO:werkzeug:127.0.0.1 - - [28/Nov/2022 10:27:22] "[33mGET / HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [28/Nov/2022 10:27:22] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug: * Running on http://127.0.0.1:5000 (Press CTRL+C to quit)
+INFO:werkzeug: * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:10] "POST /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:10] "POST /auth/login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:10] "POST /seller/create_store HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:10] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:10] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:10] "POST /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:10] "POST /auth/login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:10] "POST /seller/create_store HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:10] "[35m[1mPOST /seller/add_book HTTP/1.1[0m" 513 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "[35m[1mPOST /seller/add_book HTTP/1.1[0m" 513 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "POST /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "POST /auth/login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "POST /seller/create_store HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "[35m[1mPOST /seller/add_book HTTP/1.1[0m" 516 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "[35m[1mPOST /seller/add_book HTTP/1.1[0m" 516 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "POST /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "POST /auth/login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "POST /seller/create_store HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "[35m[1mPOST /seller/add_book HTTP/1.1[0m" 511 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "[35m[1mPOST /seller/add_book HTTP/1.1[0m" 511 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:11] "GET /shutdown HTTP/1.1" 200 -
+INFO:werkzeug: * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:39] "POST /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:39] "POST /auth/login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:39] "POST /buyer/add_funds HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:39] "POST /buyer/add_funds HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:39] "GET /shutdown HTTP/1.1" 200 -
+INFO:werkzeug: * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /auth/login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/create_store HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 511 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 511 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 511 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 511 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 511 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /auth/login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/create_store HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 513 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 513 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 513 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 513 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 513 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /auth/login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/create_store HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 515 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 515 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 515 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 515 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "[35m[1mPOST /seller/add_stock_level HTTP/1.1[0m" 515 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /auth/register HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /auth/login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/create_store HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_book HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_stock_level HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_stock_level HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_stock_level HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_stock_level HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "POST /seller/add_stock_level HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [29/Nov/2022 18:58:53] "GET /shutdown HTTP/1.1" 200 -
+INFO:werkzeug: * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+INFO:werkzeug: * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
