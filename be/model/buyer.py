@@ -421,8 +421,20 @@ class Buyer(db_conn.DBConn):
         self.session.commit()
 
         #加库存
+        store = self.session.query(new_order).filter_by(store_id=store_id)
+        stores=store.first()
+        cursor = self.session.query(new_order_detail).filter(new_order_detail.order_id == order_id , new_order_detail.book_id ==
+                                                             stores.book_id).first()
 
+        count = cursor.count
 
+        if store == None:
+            return error.error_non_exist_store_id(store_id)
+        store.stock_level += count
+        self.session.add(store)
+        self.session.commit()
+        self.session.close()
+        return 200, 'ok'
     #def test_auto_cancel(self, order_id: str):
 
 
