@@ -78,11 +78,12 @@ class new_order(Base):
     order_id = Column(Text, primary_key=True)
     user_id = Column(Text,nullable=False)
     store_id = Column(Text,nullable=False)
+    price = Column(Integer, nullable=False)#取消订单后返还金额
     status=Column(Text,nullable=False)
     order_time=Column(DateTime,nullable=False)
     pay_time=Column(DateTime,nullable=True)
 
-
+# ordered:已下单未付款 paid: 已付款未发货 delivered:已发货未收货   received:已收货 canceled:已取消
 # 订单细节表
 class new_order_detail(Base):
     __tablename__ = 'new_order_detail'
