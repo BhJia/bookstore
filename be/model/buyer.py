@@ -1,3 +1,4 @@
+####load
 import sqlite3 as sqlite
 import uuid
 import json
@@ -419,7 +420,7 @@ class Buyer(db_conn.DBConn):
         self.session.add(cancel_order)
         self.session.commit()
 
-
+        #加库存
 
 
     #def test_auto_cancel(self, order_id: str):
