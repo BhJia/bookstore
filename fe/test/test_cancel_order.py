@@ -18,6 +18,7 @@ class TestCancelOrder:
         ok, buy_book_id_list = gen_book.gen(non_exist_book_id=False, low_stock_level=False, max_book_count=5)
         self.buy_book_info_list = gen_book.buy_book_info_list
         assert ok
+        self.seller = gen_book.seller
         b = register_new_buyer(self.buyer_id, self.password)
         self.buyer = b
         code, self.order_id = b.new_order(self.store_id, buy_book_id_list)
@@ -40,14 +41,16 @@ class TestCancelOrder:
 
     def test_authorization_error(self):
         self.buyer_id = self.buyer_id + "_x"
-        code = self.buyer.receive_book(self.buyer_id, self.order_id)
+        code = self.buyer.receive_order(self.buyer_id, self.order_id)
         assert code != 200
 
-    # 如果确认收货了就不能再取消了
-    def test_cannot_cancel_order(self):
+    # 确认收货不能取消
+    def test_received_error(self):
         code = self.buyer.payment(self.order_id)
         assert code == 200
-        code = self.buyer.receive_book(self.buyer_id, self.order_id)
+        code = self.seller.deliver_order(self.seller_id, self.order_id)
+        assert code == 200
+        code = self.buyer.receive_order(self.buyer_id, self.order_id)
         assert code == 200
         code = self.buyer.cancel(self.buyer_id, self.order_id)
         assert code != 200
