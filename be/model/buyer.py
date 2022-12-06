@@ -36,6 +36,7 @@ class Buyer(db_conn.DBConn):
             uid = "{}_{}_{}".format(user_id, store_id, str(uuid.uuid1()))
             # print("uid",uid)
             # 对于每一件要购买的书: 先查找商家和书籍信息, 然后更新商家信息,订单细节表, 全部书籍查找结束后更新订单表
+            total_price=0
             for book_id, count in id_and_count:
                 # 注意传入的book_id是str类型, 要转换为int类型
                 book_id = int(book_id)
@@ -56,7 +57,7 @@ class Buyer(db_conn.DBConn):
                 book_info_json = json.loads(book_info)
                 # 从书籍信息中取出价格
                 price = book_info_json.get("price")
-                # print("price",price)
+                total_price+=price
 
                 # 库存不足
                 if stock_level < count:
@@ -83,7 +84,7 @@ class Buyer(db_conn.DBConn):
             # ordered:已下单未付款 paid: 已付款未发货 delivered:已发货未收货   received:已收货 canceled:已取消
             status = "ordered"
 
-            New_order = new_order(order_id=uid, store_id=store_id, user_id=user_id, status="ordered", order_time=time)
+            New_order = new_order(order_id=uid, store_id=store_id, user_id=user_id, status="ordered",price=total_price, order_time=time)
 
             # print("New_order",New_order.store_id)
             self.session.add(New_order)

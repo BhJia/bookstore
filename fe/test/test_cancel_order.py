@@ -1,11 +1,12 @@
-import pytest
-from fe.access.new_buyer import register_new_buyer
-from fe.test.gen_book_data import GenBook
-from fe.access.book import Book
 import uuid
+import pytest
+
+from fe.test.gen_book_data import GenBook
+from fe.access.new_buyer import register_new_buyer
+from fe.access.book import Book
 
 
-class TestReceiveOrder:
+class TestCancelOrder:
     @pytest.fixture(autouse=True)
     def pre_run_initialization(self):
         # 参考test_payment
@@ -32,30 +33,21 @@ class TestReceiveOrder:
         yield
 
     def test_ok(self):
-        code = self.buyer.add_funds(self.total_price)
-        assert code == 200
         code = self.buyer.payment(self.order_id)
         assert code == 200
-        # 收货
-        code = self.buyer.receive_book(self.buyer_id,self.order_id)
+        code = self.buyer.cancel(self.buyer_id, self.order_id)
         assert code == 200
 
     def test_authorization_error(self):
-        code = self.buyer.add_funds(self.total_price)
-        assert code == 200
-        code = self.buyer.payment(self.order_id)
-        assert code == 200
-        # 确认收货人身份, 所以需要对买家id进行修改以判断是否正确
         self.buyer_id = self.buyer_id + "_x"
-        code = self.buyer.receive_book(self.buyer_id,self.order_id)
+        code = self.buyer.receive_book(self.buyer_id, self.order_id)
         assert code != 200
 
-    def test_order_error(self):
-        code = self.buyer.add_funds(self.total_price)
-        assert code == 200
+    # 如果确认收货了就不能再取消了
+    def test_cannot_cancel_order(self):
         code = self.buyer.payment(self.order_id)
         assert code == 200
-        # 确认订单id,对订单id进行修改以判断是否正确
-        self.order_id = self.order_id + "_x"
-        code = self.buyer.receive_book(self.buyer_id,self.order_id)
+        code = self.buyer.receive_book(self.buyer_id, self.order_id)
+        assert code == 200
+        code = self.buyer.cancel(self.buyer_id, self.order_id)
         assert code != 200
