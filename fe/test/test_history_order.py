@@ -16,6 +16,7 @@ class Test_search_history_status:
         ok, buy_book_id_list = gen_book.gen(non_exist_book_id=False, low_stock_level=False, max_book_count=5)
         self.buy_book_info_list = gen_book.buy_book_info_list
         assert ok
+        self.seller = gen_book.seller
         b = register_new_buyer(self.buyer_id, self.password)
         self.buyer = b
         code, self.order_id = b.new_order(self.store_id, buy_book_id_list)
@@ -33,9 +34,11 @@ class Test_search_history_status:
 
     # @pytest.mark.run(order=5)
     def test_ok(self):
-        code = self.buyer.add_funds(self.total_price)
+        code = self.buyer.add_funds(self.total_price+10000)
         assert code == 200
         code = self.buyer.payment(self.order_id)
+        assert code == 200
+        code = self.seller.deliver_order(self.seller_id, self.order_id)
         assert code == 200
         code = self.buyer.receive_order(self.buyer_id, self.order_id)
         assert code == 200

@@ -31,12 +31,14 @@ class TestCancelOrder:
                 continue
             else:
                 self.total_price = self.total_price + book.price * num
+        code=self.buyer.add_funds(self.total_price+10000)
+        assert code==200
         yield
 
     def test_ok(self):
         code = self.buyer.payment(self.order_id)
         assert code == 200
-        code = self.buyer.cancel(self.buyer_id, self.order_id)
+        code = self.buyer.cancel_order(self.buyer_id, self.order_id)
         assert code == 200
 
     def test_authorization_error(self):
@@ -52,5 +54,5 @@ class TestCancelOrder:
         assert code == 200
         code = self.buyer.receive_order(self.buyer_id, self.order_id)
         assert code == 200
-        code = self.buyer.cancel(self.buyer_id, self.order_id)
+        code = self.buyer.cancel_order(self.buyer_id, self.order_id)
         assert code != 200

@@ -62,3 +62,10 @@ class Buyer:
         headers = {"token": self.token}
         r = requests.post(url, headers=headers, json=json)
         return r.status_code
+
+    def timeout_cancel(self, order_id: str):
+        json={"order_id":order_id}
+        url=urljoin(self.url_prefix, "timeout_cancel")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        return r.status_code

@@ -52,8 +52,24 @@ def receive_order():
 
 @bp_buyer.route("/cancel_order", methods=["POST"])
 def cancel_order():
-    user_id: str = request.json.get("user_id")
+    buyer_id: str = request.json.get("buyer_id")
     order_id: str = request.json.get("order_id")
     b = Buyer()
-    code, message = b.cancel_order(user_id,order_id)
+    code, message = b.cancel_order(buyer_id,order_id)
+    return jsonify({"message": message}), code
+
+
+@bp_buyer.route("/history_order", methods=["POST"])
+def history_order():
+    buyer_id: str = request.json.get("buyer_id")
+    status: str = request.json.get("status")
+    b = Buyer()
+    code, message, info = b.history_order(buyer_id, status)
+    return jsonify({"message": message, "history info": info}), code
+
+@bp_buyer.route("/timeout_cancel", methods=["POST"])
+def timeout_cancel():
+    order_id: str=request.json.get("order_id")
+    b=Buyer()
+    code, message=b.timeout_cancel(order_id)
     return jsonify({"message": message}), code

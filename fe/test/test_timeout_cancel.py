@@ -30,16 +30,20 @@ class Test_auto_cancel:
                 continue
             else:
                 self.total_price = self.total_price + book.price * num
+        code = self.buyer.add_funds(self.total_price + 10000)
+        assert code == 200
         yield
 
     def test_ok(self):
-        time.sleep(20)
-        #设一个函数，查询unpaid里面没有，canceled里面有
-        code = self.buyer.auto_cancel(self.order_id)
+        code = self.buyer.timeout_cancel(self.order_id)
+        assert code == 200
+        time.sleep(6)
+        code = self.buyer.timeout_cancel(self.order_id)
         assert code == 200
 
-    def test_not_ok(self):
-        time.sleep(5)
-        #未超时，还保存在unpaid中
-        code = self.buyer.auto_cancel(self.order_id)
-        assert code == 600
+
+    def test_paid(self):
+        code = self.buyer.payment(self.order_id)
+        assert code == 200
+        code = self.buyer.timeout_cancel(self.order_id)
+        assert code != 200
