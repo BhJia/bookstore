@@ -9,7 +9,7 @@ from be.model import error
 from sqlalchemy.exc import SQLAlchemyError
 from be.model.postgresql import book, user, user_store, store, new_order, new_order_detail
 from sqlalchemy.sql import and_
-import datetime
+from datetime import datetime
 
 
 # ======如果不运行自动取消订单，请注释掉以下部分
@@ -72,7 +72,9 @@ class Buyer(db_conn.DBConn):
                 self.session.add(cursor)
 
                 # 更新订单细节表
+                print("11111")
                 New_order_detail = new_order_detail(order_id=uid, book_id=book_id, count=count, price=price)
+                print("22222")
                 self.session.add(New_order_detail)
                 print(New_order_detail.order_id)
 
@@ -266,7 +268,7 @@ class Buyer(db_conn.DBConn):
 
             # 查所有订单
             if status == "all":
-                all_order = self.session.query(new_order_detail).filter(new_order_detail.buyer_id == buyer_id)
+                all_order = self.session.query(new_order_detail).filter_by(buyer_id=buyer_id)
                 order_info = []
                 for order in all_order:
                     order_info.append({
@@ -279,9 +281,7 @@ class Buyer(db_conn.DBConn):
 
             # 已下单未付款
             if status == "ordered":
-                ordered = self.session.query(new_order).filter(new_order.status == "ordered",
-                                                               new_order.user_id == buyer_id,
-                                                               new_order.order_time != None)
+                ordered = self.session.query(new_order).filter_by(status="ordered", user_id=buyer_id)
                 order_info = []
                 for order in ordered:
                     info = self.session.query(new_order_detail).filter_by(order_id=order.order_id).all()
@@ -289,18 +289,14 @@ class Buyer(db_conn.DBConn):
                         "order_id": order.order_id,
                         "order_time": order.order_time,
                         "status": "ordered",
-                        "book_list": [
-                            {"book_id": book.book_id, "count": book.count, "price": book.price}
-                            for book in info
-                        ]
+                        "book_list": [{"book_id": book.book_id, "count": book.count, "price": book.price}
+                                      for book in info]
                     })
                 self.session.close()
 
             # 已付款待发货
             if status == "paid":
-                paid = self.session.query(new_order).filter(new_order.status == "paid",
-                                                            new_order.user_id == buyer_id,
-                                                            new_order.pay_time != None)
+                paid = self.session.query(new_order).filter_by(status="paid", user_id=buyer_id)
                 order_info = []
                 for order in paid:
                     info = self.session.query(new_order_detail).filter_by(order_id=order.order_id).all()
@@ -317,8 +313,7 @@ class Buyer(db_conn.DBConn):
 
             # 已发货未收货
             if status == "delivered":
-                delivered = self.session.query(new_order).filter(new_order.status == "delivered",
-                                                                 new_order.user_id == buyer_id)
+                delivered = self.session.query(new_order).filter_by(status="delivered", user_id=buyer_id)
                 order_info = []
                 for order in delivered:
                     info = self.session.query(new_order_detail).filter_by(order_id=order.order_id).all()
@@ -334,8 +329,7 @@ class Buyer(db_conn.DBConn):
 
             # 已收货
             if status == "received":
-                received = self.session.query(new_order).filter(new_order.status == "received",
-                                                                new_order.user_id == buyer_id)
+                received = self.session.query(new_order).filter_by(status="received", user_id=buyer_id)
                 order_info = []
                 for order in received:
                     info = self.session.query(new_order_detail).filter_by(order_id=order.order_id).all()
@@ -351,9 +345,7 @@ class Buyer(db_conn.DBConn):
 
             # 取消的订单
             if status == "canceled":
-                canceled = self.session.query(new_order).filter(new_order.status == "canceled",
-                                                                new_order.user_id == buyer_id,
-                                                                new_order.cancel_time != None)
+                canceled = self.session.query(new_order).filter_by(status="canceled", user_id=buyer_id)
                 order_info = []
                 for order in canceled:
                     info = self.session.query(new_order_detail).filter_by(order_id=order.order_id).all()
@@ -420,7 +412,24 @@ class Buyer(db_conn.DBConn):
         return 200, 'ok'
 
     def timeout_cancel(self, order_id: str):
-        return 0
+        # 设置最大待支付时间
+        payTimeLimit=600
+        # 获取当前时间
+        time_now=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # 查找待支付订单
+        cursor=self.session.query(new_order).filter_by(order_id=order_id,status="ordered").first()
+        # 获取下单时间
+        order_time=datetime.strptime(cursor.order_time, "%Y-%m-%d %H:%M:%S")
+        # 改变格式, 方便后序计算
+        time_now=datetime.strptime(time_now, "%Y-%m-%d %H:%M:%S")
+        # 计算间隔时间
+        duration=(time_now-order_time).seconds
+        # 如果超时, 则取消订单
+        if duration>payTimeLimit:
+            cursor.status="canceled"
+            self.session.add(cursor)
+            self.session.commit()
+        self.session.close()
 
 
 # EXPLAIN ANALYZE SELECT DISTINCT book_id FROM search_book_intro  WHERE tsv_column @@ '美丽' LIMIT 100
