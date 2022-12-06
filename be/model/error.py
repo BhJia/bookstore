@@ -63,8 +63,8 @@ def error_invalid_order_id(order_id):
 
 
 def error_not_sufficient_funds(order_id):
-    print(error_code[518].format(order_id))
-    return 519, error_code[518].format(order_id)
+    print(error_code[519].format(order_id))
+    return 519, error_code[519].format(order_id)
 
 
 def error_authorization_fail():

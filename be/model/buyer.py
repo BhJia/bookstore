@@ -73,8 +73,11 @@ class Buyer(db_conn.DBConn):
                 self.session.add(cursor)
 
                 # 更新订单细节表
+
                 New_order_detail = new_order_detail(order_id=uid, book_id=book_id, count=count, price=price)
+
                 self.session.add(New_order_detail)
+                print(New_order_detail.order_id)
 
             # 更新订单表
             time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # 当前下单时间
@@ -104,7 +107,6 @@ class Buyer(db_conn.DBConn):
     def payment(self, user_id: str, password: str, order_id: str) -> (int, str):
         try:
             # 根据订单id查找订单
-            # print("1")
             row = self.session.query(new_order).filter(new_order.order_id == order_id).first()
             if row is None:
                 return error.error_invalid_order_id(order_id)
@@ -116,7 +118,7 @@ class Buyer(db_conn.DBConn):
             # 买家用户信息不一致
             if buyer_id != user_id:
                 return error.error_authorization_fail()
-            # print("2")
+
             # 查找买家用户id
             row = self.session.query(user).filter(user.user_id == buyer_id).first()
             if row is None:
@@ -124,10 +126,10 @@ class Buyer(db_conn.DBConn):
             balance = row.balance
 
             # 密码错误
+
             if password != row.password:
                 return error.error_authorization_fail()
 
-            # print("3")
             # 查找user_store表
             row = self.session.query(user_store).filter(user_store.store_id == store_id).first()
             if row is None:
@@ -139,44 +141,43 @@ class Buyer(db_conn.DBConn):
                 return error.error_non_exist_user_id(seller_id)
 
             # 查找新订单, 计算总价看用户是否有足够余额支付
-            # print("4")
             cursor = self.session.query(new_order_detail).filter(new_order_detail.order_id == order_id).all()
+
             total_price = 0
             for row in cursor:
                 count = row.count
                 price = row.price
                 total_price += price * count
-
+            #print(error.error_not_sufficient_funds(order_id))
             if balance < total_price:
                 return error.error_not_sufficient_funds(order_id)
 
             # 更新订单总价格
-            # print("5")
             cursor = self.session.query(new_order).filter(new_order.order_id == order_id).first()
             cursor.price += total_price
             self.session.add(cursor)
 
             # 买家余额更新
-            # print("6")
-            cursor = self.session.query(user).filter(
-                and_(user.user_id == buyer_id, user.balance >= total_price)).first()
+            cursor = self.session.query(user).filter(user.user_id == buyer_id, user.balance >= total_price).first()
+
             if cursor == None:
                 return error.error_not_sufficient_funds(order_id)
             cursor.balance -= total_price
             self.session.add(cursor)
 
             # 更新订单表数据
-            # print("7")
             time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # 当前下单时间
             cursor = self.session.query(new_order).filter(new_order.order_id == order_id).first()
+
             if cursor == None:
                 return error.error_invalid_order_id(order_id)
             cursor.status = "paid"
             cursor.pay_time = time
-            # print("8")
+
+
             self.session.add(cursor)
+
             self.session.commit()
-            self.session.close()
 
         except SQLAlchemyError as e:
             print("{}".format(str(e)))
@@ -220,30 +221,26 @@ class Buyer(db_conn.DBConn):
     # 收货
     def receive_order(self, user_id: str, order_id: str):
         try:
-            print("1")
             # 判断该用户是否存在
+
             if not self.user_id_exist(user_id):
                 return error.error_non_exist_user_id(user_id) + (order_id,)
 
-            print("2")
             # 判断该订单是否在配送中
-            row = self.session.query(new_order).filter_by(status="delivered", order_id=order_id).first()
+            row = self.session.query(new_order).filter_by(status="paid", order_id=order_id).first()
             if row is None:
                 return error.error_invalid_order_id(order_id)
 
-            print("3")
             # 判断用户id和买家id是否一致
             buyer_id = row.user_id
             if user_id != buyer_id:
                 return error.error_authorization_fail()
-
 
             # 商店ID
             storeID = row.store_id
             # 订单总价格
             total_price = row.price
 
-            print("4")
             # 查找user_store表
             row = self.session.query(user_store).filter(user_store.store_id == storeID).first()
             if row is None:
@@ -251,16 +248,16 @@ class Buyer(db_conn.DBConn):
 
             # 卖家id
             seller_id = row.user_id
+
             if not self.user_id_exist(seller_id):
                 return error.error_non_exist_user_id(seller_id)
 
-            print("5")
             # 卖家余额更新
             cursor = self.session.query(user).filter(user.user_id == seller_id).first()
+
             if cursor == None:
                 return error.error_non_exist_user_id(seller_id)
             cursor.balance += total_price
-            print("6")
             self.session.add(cursor)
 
             self.session.commit()
@@ -379,20 +376,22 @@ class Buyer(db_conn.DBConn):
 
     # 取消订单
     def cancel_order(self, buyer_id: str, order_id: str):
+        print(buyer_id)
         if not self.user_id_exist(buyer_id):
-            return error.error_non_exist_user_id(buyer_id)
+            code, mes = error.error_non_exist_user_id(buyer_id)
+            return code, mes
 
         # 是否属于未付款订单
-        # print("1")
         store = self.session.query(new_order).filter_by(status="ordered", user_id=buyer_id, order_id=order_id).first()
         if store == None:
-            # print("2")
             # 是否属于已付款且未发货订单
             order1 = self.session.query(new_order).filter_by(status="paid", order_id=order_id).first()
+
+
             if order1 == None:
-                # print("3")
                 return error.error_invalid_order_id(order_id)
             store_id = order1.store_id
+
             price = order1.price
 
             # 修改订单状态
@@ -400,29 +399,28 @@ class Buyer(db_conn.DBConn):
             self.session.add(order1)
 
             # 买家退款
-            # print("4")
             cursor = self.session.query(user).filter_by(user_id=buyer_id)
+            print("------------------")
             if cursor == None:
                 return error.error_non_exist_user_id(buyer_id)
+
             cursor.balance += price
             self.session.add(cursor)
             self.session.commit()
 
         else:
-            # print("5")
             store.status = "canceled"
             self.session.add(store)
             self.session.commit()
 
         # 增加库存
         # 查store取出book_id
-        # print("6")
         store1 = self.session.query(store).filter_by(store_id=store_id).first()
+        print("###############")
         if store == None:
             return error.error_non_exist_store_id(store_id)
 
         # 查订单细节更新库存(注意一个订单可能不止一个子订单, 需要遍历所有子订单增加库存)
-        # print("7")
         cursor = self.session.query(new_order_detail).filter_by(order_id=order_id, book_id=store1.book_id).first()
         store.stock_level += cursor.count
 
