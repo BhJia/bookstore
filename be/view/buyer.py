@@ -51,7 +51,7 @@ def receive_books():
 
     return jsonify({"message":message}), code
 
-@bp_buyer.route("/cancel", methods=["POST"])
+@bp_buyer.route("/cancel_order", methods=["POST"])
 def cancel_order():
     user_id: str = request.json.get("buyer_id")
     order_id: str = request.json.get("order_id")
