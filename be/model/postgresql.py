@@ -1,6 +1,6 @@
 import json
 
-from sqlalchemy import Column, create_engine, Integer, Text, LargeBinary, ForeignKey,DateTime
+from sqlalchemy import Column, create_engine, Integer, Text, LargeBinary, ForeignKey, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import sqlite3 as sqlite
@@ -61,6 +61,7 @@ class user_store(Base):
     user_id = Column(Text, primary_key=True, nullable=False)
     store_id = Column(Text, primary_key=True, nullable=False, unique=True)
 
+
 # 商店表
 class store(Base):
     __tablename__ = 'store'
@@ -76,12 +77,13 @@ class store(Base):
 class new_order(Base):
     __tablename__ = 'new_order'
     order_id = Column(Text, primary_key=True)
-    user_id = Column(Text,nullable=False)
-    store_id = Column(Text,nullable=False)
-    price = Column(Integer, nullable=False)#取消订单后返还金额
-    status=Column(Text,nullable=False)
-    order_time=Column(DateTime,nullable=False)
-    pay_time=Column(DateTime,nullable=True)
+    user_id = Column(Text, nullable=False)
+    store_id = Column(Text, nullable=False)
+    price = Column(Integer, nullable=False)  # 取消订单后返还金额
+    status = Column(Text, nullable=False)
+    order_time = Column(DateTime, nullable=False)
+    pay_time = Column(DateTime, nullable=True)
+
 
 # ordered:已下单未付款 paid: 已付款未发货 delivered:已发货未收货   received:已收货 canceled:已取消
 # 订单细节表
@@ -141,34 +143,6 @@ def deleteAllData():
 def deleteTables():
     Base.metadata.drop_all(engine)
 
-
-def add_test_data():
-    session = DbSession()
-    session.add_all([user(user_id='01', password='01', balance=5000, token='...', terminal='127.0.0.1'),
-                     user(user_id='02', password='02', balance=6000, token='...', terminal='127.0.0.2'),
-                     user(user_id='03', password='03', balance=7000, token='...', terminal='127.0.0.3'),
-                     user(user_id='04', password='04', balance=8000, token='...', terminal='127.0.0.4'),
-                     user(user_id='05', password='05', balance=9000, token='...', terminal='127.0.0.5'),
-
-                     store(store_id='a', book_id='1000067', book_info=json.dumps({'price': 3879}), stock_level=1),
-                     store(store_id='b', book_id='1000135', book_info=json.dumps({'price': 1380}), stock_level=1),
-                     store(store_id='c', book_id='1000280', book_info=json.dumps({'price': 1700}), stock_level=1),
-                     store(store_id='d', book_id='1000965', book_info=json.dumps({'price': 2600}), stock_level=2),
-
-                     user_store(user_id='01', store_id='a'),
-                     user_store(user_id='02', store_id='b'),
-                     user_store(user_id='03', store_id='c'),
-                     user_store(user_id='03', store_id='d')
-                     ])
-    session.commit()
-    session.close()
-
-def Test(attr:str,book:book):
-    session = DbSession()
-    if str(book.title)==attr:
-        row=session.query(book).filter(book.title.like("%三毛%")).first()
-    print(row.title)
-
-
 if __name__ == '__main__':
-    Test("book.title", book)
+    createTable()
+    insertData()

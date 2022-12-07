@@ -17,7 +17,7 @@ class Buyer(db_conn.DBConn):
     def __init__(self):
         db_conn.DBConn.__init__(self)
 
-    # 买家下单: 参数(买家用户ID; 商家ID; books数组,包含书籍ID和购买数量)
+    # 买家下单
     def new_order(self, user_id: str, store_id: str, id_and_count: [(str, int)]) -> (int, str, str):
         order_id = ""
 
@@ -440,6 +440,7 @@ class Buyer(db_conn.DBConn):
             return 530, "{}".format(str(e))
         return 200, 'ok'
 
+    # 搜索图书
     def search(self, buyer_id: str, store_id: str, search_type: str, search_scope: str, search_content: str):
         try:
             if not self.user_id_exist(buyer_id):
@@ -485,6 +486,7 @@ class Buyer(db_conn.DBConn):
             return 530, "{}".format(str(e))
         return 200, 'ok', book_info
 
+    # 订单超时自动取消
     def timeout_cancel(self, order_id: str):
         try:
             # 设置最大待支付时间
