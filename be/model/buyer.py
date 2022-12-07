@@ -1,4 +1,3 @@
-####load
 import sqlite3 as sqlite
 import uuid
 import json
@@ -6,16 +5,11 @@ import logging
 import time
 from be.model import db_conn
 from be.model import error
+from sqlalchemy import Column
 from sqlalchemy.exc import SQLAlchemyError
 from be.model.postgresql import book, user, user_store, store, new_order, new_order_detail
 from sqlalchemy.sql import and_
 from datetime import datetime
-
-
-# ======如果不运行自动取消订单，请注释掉以下部分
-# import redis #为了实现自动删除超时订单
-# 连接redis数据库
-# r=redis.StrictRedis(host='localhost',port=6379,db=0,decode_responses=True)
 
 
 class Buyer(db_conn.DBConn):
@@ -394,7 +388,8 @@ class Buyer(db_conn.DBConn):
 
             # 是否属于未付款订单
             # print("1")
-            stored = self.session.query(new_order).filter_by(status="ordered", user_id=buyer_id, order_id=order_id).first()
+            stored = self.session.query(new_order).filter_by(status="ordered", user_id=buyer_id,
+                                                             order_id=order_id).first()
             if stored == None:
                 # print("2")
                 # 是否属于已付款且未发货订单
@@ -445,16 +440,60 @@ class Buyer(db_conn.DBConn):
             return 530, "{}".format(str(e))
         return 200, 'ok'
 
+    def search(self, buyer_id: str, store_id: str, search_type: str, search_scope: str, search_content: str):
+        try:
+            if not self.user_id_exist(buyer_id):
+                return error.error_non_exist_user_id(buyer_id)
+            type=[book.title,book.tags,book.book_intro,book.content]
+            if search_scope == "all":
+                all_book = self.session.query(book).filter(type[int(search_type)].like("%" + search_content + "%")).all()
+
+                if all_book is None:
+                    return error.error_cannot_find_book(buyer_id)
+
+                book_info = []
+                for row in all_book:
+                    book_info.append({"title": row.title, "author": row.author, "publisher": row.publisher,
+                                      "original_title": row.original_title, "translator": row.translator,
+                                      "pub_year": row.pub_year, "pages": row.pages, "price": row.price,
+                                      "binding": row.binding, "isbn": row.isbn, "author_Intro": row.author_intro,
+                                      "book_intro": row.book_intro, "content": row.content, "tags": row.tags})
+
+            else:
+                if not self.store_id_exist(store_id):
+                    return error.error_exist_store_id(store_id)
+
+                store_book = self.session.query(book).join(store, store.book_id == book.id).filter(
+                    type[int(search_type)].like("%" + search_content + "%")).all()
+
+                if store_book is None:
+                    return error.error_cannot_find_book(buyer_id)
+
+                book_info = []
+                for row in store_book:
+                    book_info.append({"title": row.title, "author": row.author, "publisher": row.publisher,
+                                      "original_title": row.original_title, "translator": row.translator,
+                                      "pub_year": row.pub_year, "pages": row.pages, "price": row.price,
+                                      "binding": row.binding, "isbn": row.isbn, "author_Intro": row.author_intro,
+                                      "book_intro": row.book_intro, "content": row.content, "tags": row.tags})
+
+        except SQLAlchemyError as e:
+            print("{}".format(str(e)))
+            return 528, "{}".format(str(e))
+        except BaseException as e:
+            print("{}".format(str(e)))
+            return 530, "{}".format(str(e))
+        return 200, 'ok', book_info
+
     def timeout_cancel(self, order_id: str):
         try:
-            print("1")
             # 设置最大待支付时间
             payTimeLimit = 5
             # 获取当前时间
             time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             # 查找待支付订单
             cursor = self.session.query(new_order).filter_by(order_id=order_id, status="ordered").first()
-            print("2")
+
             # 订单已经支付则无法取消
             if cursor is None:
                 return error.error_order_paid(order_id)
@@ -466,7 +505,6 @@ class Buyer(db_conn.DBConn):
             duration = (time_now - order_time).seconds
             # 如果超时, 则取消订单
             if duration > payTimeLimit:
-                print("3")
                 cursor.status = "canceled"
                 self.session.add(cursor)
                 self.session.commit()
@@ -480,5 +518,3 @@ class Buyer(db_conn.DBConn):
             return 530, "{}".format(str(e))
         return 200, 'ok'
 
-# EXPLAIN ANALYZE SELECT DISTINCT book_id FROM search_book_intro  WHERE tsv_column @@ '美丽' LIMIT 100
-# def search_functions_limit(self, store_id: str, search_type: str, search_input: str, field: str) -> (int, [dict]):

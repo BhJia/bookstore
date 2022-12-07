@@ -2,6 +2,7 @@ import requests
 import simplejson
 from urllib.parse import urljoin
 from fe.access.auth import Auth
+from sqlalchemy import Column
 
 
 class Buyer:
@@ -44,6 +45,7 @@ class Buyer:
     def receive_order(self, buyer_id: str, order_id: str) -> int:
         json = {"user_id": buyer_id, "order_id": order_id}
         url = urljoin(self.url_prefix, "receive_order")
+        print(url)
         headers = {"token": self.token}
         r = requests.post(url, headers=headers, json=json)
         return r.status_code
@@ -55,19 +57,24 @@ class Buyer:
         r = requests.post(url, headers=headers, json=json)
         return r.status_code
 
-    def cancel_order(self,buyer_id: str, order_id: str):
-        json = {
-            "buyer_id": buyer_id,
-            "order_id": order_id
-        }
+    def cancel_order(self, buyer_id: str, order_id: str):
+        json = {"buyer_id": buyer_id, "order_id": order_id}
         url = urljoin(self.url_prefix, "cancel_order")
         headers = {"token": self.token}
         r = requests.post(url, headers=headers, json=json)
         return r.status_code
 
     def timeout_cancel(self, order_id: str):
-        json={"order_id":order_id}
-        url=urljoin(self.url_prefix, "timeout_cancel")
+        json = {"order_id": order_id}
+        url = urljoin(self.url_prefix, "timeout_cancel")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        return r.status_code
+
+    def search(self, buyer_id: str, store_id: str, search_type: str, search_scope: str, search_content: str):
+        json = {"buyer_id": buyer_id, "store_id": store_id, "search_type": search_type, "search_scope": search_scope,
+                "search_content": search_content}
+        url = urljoin(self.url_prefix, "search")
         headers = {"token": self.token}
         r = requests.post(url, headers=headers, json=json)
         return r.status_code

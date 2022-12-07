@@ -163,9 +163,12 @@ def add_test_data():
     session.commit()
     session.close()
 
+def Test(attr:str,book:book):
+    session = DbSession()
+    if str(book.title)==attr:
+        row=session.query(book).filter(book.title.like("%三毛%")).first()
+    print(row.title)
+
 
 if __name__ == '__main__':
-    deleteTables()
-    # deleteAllData()
-    createTable()
-    insertData()
+    Test("book.title", book)

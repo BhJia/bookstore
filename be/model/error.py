@@ -1,4 +1,3 @@
-
 error_code = {
     401: "authorization fail.",
     511: "non exist user id {}",
@@ -11,7 +10,7 @@ error_code = {
     518: "invalid order id {}",
     519: "not sufficient funds, order id {}",
     520: "order already paid, order id{}",
-    521: "",
+    521: "cannot find books according to the search content, buyer id{}",
     522: "",
     523: "",
     524: "",
@@ -44,12 +43,12 @@ def error_exist_store_id(store_id):
 
 def error_non_exist_book_id(book_id):
     print(error_code[515].format(book_id))
-    return 515,  error_code[515].format(book_id)
+    return 515, error_code[515].format(book_id)
 
 
 def error_exist_book_id(book_id):
     print(error_code[516].format(book_id))
-    return 516,  error_code[516].format(book_id)
+    return 516, error_code[516].format(book_id)
 
 
 def error_stock_level_low(book_id):
@@ -66,9 +65,15 @@ def error_not_sufficient_funds(order_id):
     print(error_code[519].format(order_id))
     return 519, error_code[519].format(order_id)
 
+
 def error_order_paid(order_id):
     print(error_code[520].format(order_id))
     return 520, error_code[520].format(order_id)
+
+
+def error_cannot_find_book(buyer_id):
+    print(error_code[521].format(buyer_id))
+    return 521, error_code[521].format(buyer_id)
 
 
 def error_authorization_fail():
