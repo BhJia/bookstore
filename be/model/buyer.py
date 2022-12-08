@@ -5,7 +5,7 @@ import logging
 import time
 from be.model import db_conn
 from be.model import error
-from sqlalchemy import Column
+from sqlalchemy import Column, func
 from sqlalchemy.exc import SQLAlchemyError
 from be.model.postgresql import book, user, user_store, store, new_order, new_order_detail
 from sqlalchemy.sql import and_
@@ -445,12 +445,22 @@ class Buyer(db_conn.DBConn):
             if not self.user_id_exist(buyer_id):
                 return error.error_non_exist_user_id(buyer_id)
             # 查找的类型
-            type=[book.title,book.tags,book.book_intro,book.content]
+            type = [book.title, book.tags, book.book_intro, book.content]
 
             # 全站搜索
             if search_scope == "all":
                 # 使用like进行搜索匹配
-                all_book = self.session.query(book).filter(type[int(search_type)].like("%" + search_content + "%")).all()
+                all_book = self.session.query(book).filter(
+                    type[int(search_type)].like("%" + search_content + "%")).all()
+
+                # 分页
+                # count = all_book.count()
+                # pagesize = 5
+                # if count >= 5:
+                #     for i in count / 5:
+                #         all_book = self.session.query(book).filter(
+                #             type[int(search_type)].like("%" + search_content + "%")).offset(pagesize * i).limit(
+                #             pagesize).all()
 
                 # 查不到书
                 if all_book is None:
@@ -525,4 +535,3 @@ class Buyer(db_conn.DBConn):
             print("{}".format(str(e)))
             return 530, "{}".format(str(e))
         return 200, 'ok'
-
