@@ -14,6 +14,7 @@ class Seller(db_conn.DBConn):
     # 添加书籍
     def add_book(self, user_id: str, store_id: str, book_id: str, book_json_str: str, stock_level: int):
         try:
+            # 判断用户id,店铺id,书籍id是否存在
             if not self.user_id_exist(user_id):
                 return error.error_non_exist_user_id(user_id)
             if not self.store_id_exist(store_id):
@@ -21,6 +22,7 @@ class Seller(db_conn.DBConn):
             if self.book_id_exist(store_id, book_id):
                 return error.error_exist_book_id(book_id)
 
+            # 创建商铺对象, 包含书籍id,信息,库存
             store1=store(store_id=store_id,book_id = book_id,book_info = book_json_str,stock_level=stock_level)
             self.session.add(store1)
             self.session.commit()
@@ -36,15 +38,20 @@ class Seller(db_conn.DBConn):
     # 增加库存
     def add_stock_level(self, user_id: str, store_id: str, book_id: str, add_stock_level: int):
         try:
+            # 判断用户id,店铺id,书籍id是否存在
             if not self.user_id_exist(user_id):
                 return error.error_non_exist_user_id(user_id)
             if not self.store_id_exist(store_id):
                 return error.error_non_exist_store_id(store_id)
             if not self.book_id_exist(store_id, book_id):
                 return error.error_non_exist_book_id(book_id)
+
+            # 根据store_id和book_id查找相关店铺
             storel = self.session.query(store).filter_by(store_id=store_id
                                                          , book_id=book_id).first()
+            # 更新相关书籍库存
             storel.stock_level += add_stock_level
+            self.session.add(storel)
             self.session.commit()
             self.session.close()
         except SQLAlchemyError as e:
@@ -58,10 +65,11 @@ class Seller(db_conn.DBConn):
     # 发货
     def deliver_order(self, user_id: str, order_id: str):
         try:
-            # 判断该用户是否存在
+            # 判断该用户(买家)是否存在
             if not self.user_id_exist(user_id):
                 return error.error_non_exist_user_id(user_id) + (order_id,)
 
+            # 查找待发货订单并判断是否存在该订单
             order = self.session.query(new_order).filter_by(order_id=order_id, status="paid").first()
             if order is None:
                 return error.error_invalid_order_id(order_id)
@@ -87,11 +95,13 @@ class Seller(db_conn.DBConn):
     # 创建店铺
     def create_store(self, user_id: str, store_id: str) -> (int, str):
         try:
+            # 判断用户id,店铺id是否存在
             if not self.user_id_exist(user_id):
                 return error.error_non_exist_user_id(user_id)
             if self.store_id_exist(store_id):
                 return error.error_exist_store_id(store_id)
 
+            # 按照用户id,店铺id创建用户店铺关系对象加入user_store表
             usr_store1 = user_store(store_id=store_id, user_id=user_id)
             self.session.add(usr_store1)
             self.session.commit()

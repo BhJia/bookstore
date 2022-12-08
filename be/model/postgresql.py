@@ -1,10 +1,7 @@
-import json
-
 from sqlalchemy import Column, create_engine, Integer, Text, LargeBinary, ForeignKey, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import sqlite3 as sqlite
-import random
 
 # 建立连接('postgresql+psycopg2://postgres:密码@localhost/数据库名称')
 engine = create_engine('postgresql+psycopg2://postgres:12345678@localhost/bookstore', encoding='utf-8', echo=True)
@@ -26,8 +23,8 @@ def init_database():
 # 定义原始的图书表(按照markdown文件中的Schema)
 class book(Base):
     __tablename__ = 'book'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(Text, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    title = Column(Text, nullable=False, index=True)
     author = Column(Text, nullable=True)
     publisher = Column(Text, nullable=True)
     original_title = Column(Text, nullable=True)
@@ -38,17 +35,17 @@ class book(Base):
     binding = Column(Text, nullable=True)
     isbn = Column(Text, nullable=True)
     author_intro = Column(Text, nullable=True)
-    book_intro = Column(Text, nullable=True)
-    content = Column(Text, nullable=True)
-    tags = Column(Text, nullable=True)
+    book_intro = Column(Text, nullable=True, index=True)
+    content = Column(Text, nullable=True, index=True)
+    tags = Column(Text, nullable=True, index=True)
     # LargeBinary类型可以存储Blob类型文件
     picture = Column(LargeBinary, nullable=True)
 
 
 # 用户表
 class user(Base):
-    __tablename__ = 'usr'
-    user_id = Column(Text, primary_key=True, unique=True)
+    __tablename__ = 'user'
+    user_id = Column(Text, primary_key=True, unique=True, index=True)
     password = Column(Text, nullable=False)
     balance = Column(Integer, nullable=False)
     token = Column(Text, nullable=False)
@@ -58,15 +55,15 @@ class user(Base):
 # 用户商店关系表
 class user_store(Base):
     __tablename__ = 'user_store'
-    user_id = Column(Text, primary_key=True, nullable=False)
-    store_id = Column(Text, primary_key=True, nullable=False, unique=True)
+    user_id = Column(Text, ForeignKey('user.user_id'), primary_key=True, nullable=False, index=True)
+    store_id = Column(Text, primary_key=True, nullable=False, unique=True, index=True)
 
 
 # 商店表
 class store(Base):
     __tablename__ = 'store'
-    store_id = Column(Text, primary_key=True, nullable=False)
-    book_id = Column(Integer, primary_key=True, nullable=False)
+    store_id = Column(Text, ForeignKey('user_store.store_id'), primary_key=True, nullable=False, index=True)
+    book_id = Column(Integer, ForeignKey('book.id'), primary_key=True, nullable=False)
     book_info = Column(Text, nullable=True)
     stock_level = Column(Integer, nullable=True)
 
@@ -76,9 +73,9 @@ class store(Base):
 # 订单表
 class new_order(Base):
     __tablename__ = 'new_order'
-    order_id = Column(Text, primary_key=True)
-    user_id = Column(Text, nullable=False)
-    store_id = Column(Text, nullable=False)
+    order_id = Column(Text, primary_key=True, index=True)
+    user_id = Column(Text, ForeignKey('user.user_id'), nullable=False)
+    store_id = Column(Text, ForeignKey('user_store.store_id'), nullable=False)
     price = Column(Integer, nullable=False)  # 取消订单后返还金额
     status = Column(Text, nullable=False)
     order_time = Column(DateTime, nullable=False)
@@ -89,8 +86,8 @@ class new_order(Base):
 # 订单细节表
 class new_order_detail(Base):
     __tablename__ = 'new_order_detail'
-    order_id = Column(Text, primary_key=True, nullable=False)
-    book_id = Column(Integer, primary_key=True, nullable=False)
+    order_id = Column(Text, ForeignKey('new_order.order_id'), primary_key=True, nullable=False, index=True)
+    book_id = Column(Integer, ForeignKey('book.id'), primary_key=True, nullable=False)
     count = Column(Integer, nullable=False)
     price = Column(Integer, nullable=False)
 
@@ -143,6 +140,8 @@ def deleteAllData():
 def deleteTables():
     Base.metadata.drop_all(engine)
 
+
 if __name__ == '__main__':
+    # deleteTables()
     createTable()
-    insertData()
+    # insertData()

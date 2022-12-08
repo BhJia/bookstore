@@ -31,7 +31,7 @@ class TestCancelOrder:
                 continue
             else:
                 self.total_price = self.total_price + book.price * num
-        code=self.buyer.add_funds(self.total_price+10000)
+        code=self.buyer.add_funds(self.total_price+1000000)
         assert code==200
         yield
 

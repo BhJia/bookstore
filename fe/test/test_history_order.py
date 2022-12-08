@@ -55,3 +55,8 @@ class Test_search_history_status:
         code = self.buyer.history_order(self.buyer_id,"canceled")
         assert code == 200
 
+    def test_authorization_error(self):
+        self.buyer_id = self.buyer_id + "_x"
+        code = self.buyer.history_order(self.buyer_id,"all")
+        assert code != 200
+

@@ -22,11 +22,12 @@ class Buyer(db_conn.DBConn):
         order_id = ""
 
         try:
-            # 检查用户Id和商家Id是否存在
+            # 检查用户id和商家id是否存在
             if not self.user_id_exist(user_id):
                 return error.error_non_exist_user_id(user_id) + (order_id,)
             if not self.store_id_exist(store_id):
                 return error.error_non_exist_store_id(store_id) + (order_id,)
+            # 生成每个用户id和商家id的标识符uid
             uid = "{}_{}_{}".format(user_id, store_id, str(uuid.uuid1()))
             # print("uid",uid)
             # 对于每一件要购买的书: 先查找商家和书籍信息, 然后更新商家信息,订单细节表, 全部书籍查找结束后更新订单表
@@ -98,7 +99,7 @@ class Buyer(db_conn.DBConn):
     # 用户支付
     def payment(self, user_id: str, password: str, order_id: str) -> (int, str):
         try:
-            # 根据订单id查找订单
+            # 根据订单id查找订单, 判断订单是否存在
             # print("1")
             row = self.session.query(new_order).filter(new_order.order_id == order_id).first()
             if row is None:
@@ -112,7 +113,7 @@ class Buyer(db_conn.DBConn):
             if buyer_id != user_id:
                 return error.error_authorization_fail()
             # print("2")
-            # 查找买家用户id
+            # 查找买家用户
             row = self.session.query(user).filter(user.user_id == buyer_id).first()
             if row is None:
                 return error.error_non_exist_user_id(buyer_id)
@@ -123,12 +124,12 @@ class Buyer(db_conn.DBConn):
                 return error.error_authorization_fail()
 
             # print("3")
-            # 查找user_store表
+            # 查找user_store表判断店铺是否存在
             row = self.session.query(user_store).filter(user_store.store_id == store_id).first()
             if row is None:
                 return error.error_non_exist_store_id(store_id)
 
-            # 卖家id
+            # 判断卖家id是否存在
             seller_id = row.user_id
             if not self.user_id_exist(seller_id):
                 return error.error_non_exist_user_id(seller_id)
@@ -186,22 +187,18 @@ class Buyer(db_conn.DBConn):
     # 充值
     def add_funds(self, user_id, password, add_value) -> (int, str):
         try:
-            # 判断用户密码是否输入正确
+            # 判断用户是否存在,密码是否输入正确
             row = self.session.query(user).filter(user.user_id == user_id).first()
             if row == None:
-                return error.error_authorization_fail()
-
+                return error.error_non_exist_user_id(user_id)
             if row.password != password:
                 return error.error_authorization_fail()
 
             # 更新用户余额
-            cursor = self.session.query(user).filter(user.user_id == user_id).first()
-            if cursor == None:
-                return error.error_non_exist_user_id(user_id)
-            cursor.balance += add_value
-            self.session.add(cursor)
-
+            row.balance += add_value
+            self.session.add(row)
             self.session.commit()
+            self.session.close()
 
         except SQLAlchemyError as e:
             print("{}".format(str(e)))
@@ -256,8 +253,8 @@ class Buyer(db_conn.DBConn):
             cursor.balance += total_price
             # print("6")
             self.session.add(cursor)
-
             self.session.commit()
+            self.session.close()
 
         except SQLAlchemyError as e:
             return 528, "{}".format(str(e))
@@ -383,6 +380,7 @@ class Buyer(db_conn.DBConn):
     # 取消订单
     def cancel_order(self, buyer_id: str, order_id: str):
         try:
+            # 判断用户是否存在
             if not self.user_id_exist(buyer_id):
                 return error.error_non_exist_user_id(buyer_id)
 
@@ -443,15 +441,22 @@ class Buyer(db_conn.DBConn):
     # 搜索图书
     def search(self, buyer_id: str, store_id: str, search_type: str, search_scope: str, search_content: str):
         try:
+            # 判断买家id是否存在
             if not self.user_id_exist(buyer_id):
                 return error.error_non_exist_user_id(buyer_id)
+            # 查找的类型
             type=[book.title,book.tags,book.book_intro,book.content]
+
+            # 全站搜索
             if search_scope == "all":
+                # 使用like进行搜索匹配
                 all_book = self.session.query(book).filter(type[int(search_type)].like("%" + search_content + "%")).all()
 
+                # 查不到书
                 if all_book is None:
                     return error.error_cannot_find_book(buyer_id)
 
+                # 添加查找信息
                 book_info = []
                 for row in all_book:
                     book_info.append({"title": row.title, "author": row.author, "publisher": row.publisher,
@@ -459,8 +464,9 @@ class Buyer(db_conn.DBConn):
                                       "pub_year": row.pub_year, "pages": row.pages, "price": row.price,
                                       "binding": row.binding, "isbn": row.isbn, "author_Intro": row.author_intro,
                                       "book_intro": row.book_intro, "content": row.content, "tags": row.tags})
-
+            # 当前店铺搜素
             else:
+                # 店铺不存在
                 if not self.store_id_exist(store_id):
                     return error.error_exist_store_id(store_id)
 
