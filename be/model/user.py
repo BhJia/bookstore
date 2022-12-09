@@ -5,8 +5,9 @@ import sqlite3 as sqlite
 from be.model import error
 from be.model import db_conn
 from be.model.postgresql import book, store, user, user_store
+from be.model.searchpostgresql import Search_book_intro,Search_title, Search_author
 from sqlalchemy.exc import SQLAlchemyError
-
+import sqlalchemy
 
 def jwt_encode(user_id: str, terminal: str) -> str:
     encoded = jwt.encode(
@@ -173,3 +174,36 @@ class User(db_conn.DBConn):
             print("{}".format(str(e)))
             return 530, "{}".format(str(e))
         return 200, "ok"
+
+    def search_author(self, author: str, page: int) :  # 200,'ok',list[{str,str,str,str,list,bytes}]
+        ret = []
+
+        #records = self.session.execute(
+        #    " SELECT title,book.author,publisher,book_intro,tags,picture "
+        #    "FROM book WHERE id in "
+        #    "(select id from search_author where author='%s' and search_id BETWEEN %d and %d)" % (
+        #    author, 10 * page - 10, 10 * page - 1)).fetchall()
+
+        id1 = self.session.query(Search_author).all()
+        for i in id1:
+            print(i.author)
+
+        records = self.session.query(book).filter(book.id.in_(id1)).all()
+        #for i in records:
+            #print(book.name)
+        if len(records) != 0:
+            for i in range(len(records)):
+                record = records[i]
+                title = record[0]
+                author_ = record[1]
+                publisher = record[2]
+                book_intro = record[3]
+                tags = record[4]
+                ret.append(
+                        {'title': title, 'author': author_, 'publisher': publisher,
+                         'book_intro': book_intro,
+                         'tags': tags, 'picture': ''})
+
+            return 200, ret
+        else:
+            return 200

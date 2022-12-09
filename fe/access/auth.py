@@ -47,3 +47,9 @@ class Auth:
         url = urljoin(self.url_prefix, "unregister")
         r = requests.post(url, json=json)
         return r.status_code
+
+    def search_author(self, author: str, page: int) -> int:
+        json = {"author": author, "page": page}
+        url = urljoin(self.url_prefix, "search_author")
+        r = requests.post(url, json=json)
+        return r.status_code

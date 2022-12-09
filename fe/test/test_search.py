@@ -1,57 +1,45 @@
 import time
-import uuid
+
 import pytest
-
-from fe.test.gen_book_data import GenBook
-from fe.access.new_buyer import register_new_buyer
+from fe.access.new_seller import register_new_seller
 from fe.access.book import Book
-from be.model.postgresql import book
-
-class Test_search:
+from fe.access import book
+from fe.access import auth
+from fe import conf
+import uuid
+import random
+class TestSearch:
     @pytest.fixture(autouse=True)
     def pre_run_initialization(self):
-        # 参考test_payment
-        self.seller_id = "test_payment_seller_id_{}".format(str(uuid.uuid1()))
-        self.store_id = "test_payment_store_id_{}".format(str(uuid.uuid1()))
-        self.buyer_id = "test_payment_buyer_id_{}".format(str(uuid.uuid1()))
-        self.password = self.seller_id
-        gen_book = GenBook(self.seller_id, self.store_id)
-        ok, buy_book_id_list = gen_book.gen(non_exist_book_id=False, low_stock_level=False, max_book_count=100)
-        self.buy_book_info_list = gen_book.buy_book_info_list
-        assert ok
-        self.seller = gen_book.seller
-        b = register_new_buyer(self.buyer_id, self.password)
-        self.buyer = b
-        code, self.order_id = b.new_order(self.store_id, buy_book_id_list)
-        assert code == 200
-        self.total_price = 0
-        for item in self.buy_book_info_list:
-            book: Book = item[0]
-            num = item[1]
-            if book.price is None:
-                continue
-            else:
-                self.total_price = self.total_price + book.price * num
+        self.auth = auth.Auth(conf.URL)
+        self.author = "test_author_{}".format(str(uuid.uuid1()))
+        #self.book_intro = "test_book_intro_{}".format(str(uuid.uuid1()))
+        #self.tags = "test_tags_{}".format(str(uuid.uuid1()))#random.choice(["小说","励志"])
+        #self.title = "test_title_{}".format(str(uuid.uuid1()))#random.choice(["很","在"])
+        #self.store_id = "test_store_id_{}".format(str(uuid.uuid1()))
+        self.page = random.randint(1,2)
+
         yield
 
-    def test_ok(self):
-        code=self.buyer.search(self.buyer_id,self.store_id,'0',"all","三毛")
-        assert code == 200
-        code = self.buyer.search(self.buyer_id, self.store_id, '1', "all", "三毛")
-        assert code == 200
-        code = self.buyer.search(self.buyer_id, self.store_id, '2', "all", "三毛")
-        assert code == 200
-        code = self.buyer.search(self.buyer_id, self.store_id,'3', "all", "三毛")
-        assert code == 200
-        code = self.buyer.search(self.buyer_id, self.store_id, '0', "store", "三毛")
-        assert code == 200
+    def test_search(self):
 
-    def test_authorization_error(self):
-        self.buyer_id=self.buyer_id+ "_x"
-        code = self.buyer.search(self.buyer_id, self.store_id, '0', "all", "三毛")
-        assert code != 200
+        assert self.auth.search_author("阿", self.page) == 200
+        #assert self.auth.search_book_intro(self.book_intro, self.page) == 200
+        #assert self.auth.search_tags(self.tags, self.page) == 200
+        #assert self.auth.search_title(self.title, self.page) == 200
+        #assert self.auth.search_author_in_store(self.author, self.store_id,self.page) == 200
+        #assert self.auth.search_book_intro_in_store(self.book_intro, self.store_id,self.page) == 200
+        #assert self.auth.search_tags_in_store(self.title, self.store_id,self.page) == 200
+        #assert self.auth.search_title_in_store(self.tags, self.store_id,self.page) == 200
 
-    def test_store_error(self):
-        self.store_id = self.store_id + "_x"
-        code = self.buyer.search(self.buyer_id, self.store_id, '0', "store", "三毛")
-        assert code != 200
+
+    # def test_search2(self):
+    #     self.store_id = "test_add_books_store_id_b288ead4-212a-11ea-b13e-acde48001122"
+    #     assert self.auth.search_author("西尔维娅娜萨", 1) == 200
+    #     assert self.auth.search_book_intro("再现", 1) == 200
+    #     assert self.auth.search_tags("传记", 1) == 200
+    #     assert self.auth.search_title("美丽", 1) == 200
+    #     assert self.auth.search_author_in_store("西尔维娅娜萨", self.store_id, 1) == 200
+    #     assert self.auth.search_book_intro_in_store("再现", self.store_id, 1) == 200
+    #     assert self.auth.search_tags_in_store("传记", self.store_id, 1) == 200
+    #     assert self.auth.search_title_in_store("美丽", self.store_id, 1) == 200

@@ -23,8 +23,8 @@ def init_database():
 # 定义原始的图书表(按照markdown文件中的Schema)
 class book(Base):
     __tablename__ = 'book'
-    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    title = Column(Text, nullable=False, index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(Text, nullable=False)
     author = Column(Text, nullable=True)
     publisher = Column(Text, nullable=True)
     original_title = Column(Text, nullable=True)
@@ -35,9 +35,9 @@ class book(Base):
     binding = Column(Text, nullable=True)
     isbn = Column(Text, nullable=True)
     author_intro = Column(Text, nullable=True)
-    book_intro = Column(Text, nullable=True, index=True)
-    content = Column(Text, nullable=True, index=True)
-    tags = Column(Text, nullable=True, index=True)
+    book_intro = Column(Text, nullable=True)
+    content = Column(Text, nullable=True)
+    tags = Column(Text, nullable=True)
     # LargeBinary类型可以存储Blob类型文件
     picture = Column(LargeBinary, nullable=True)
 
@@ -142,6 +142,6 @@ def deleteTables():
 
 
 if __name__ == '__main__':
-    # deleteTables()
+    deleteTables()
     createTable()
-    # insertData()
+    insertData()
