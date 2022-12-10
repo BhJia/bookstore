@@ -106,7 +106,6 @@ def insert_author():
                 max_num = 0
             else:
                 max_num += 1
-            # print(max_num, j, i.book_id)
             session.execute(
                 "INSERT into search_author(search_id, author, id) VALUES (%d, '%s', %d)"
                 % (max_num, j, int(i.id)))
@@ -127,7 +126,6 @@ def insert_author():
                     max_num = 0
                 else:
                     max_num += 1
-                # print(max_num, j, i.book_id)
                 session.execute(
                     "INSERT into search_author(search_id, author, id) VALUES (%d, '%s', %d)"
                     % (max_num, j, int(i.id)))
@@ -141,14 +139,11 @@ def insert_title():
     row = session.execute("SELECT id, title FROM book;").fetchall()
     for i in row:
         tmp = i.title
-        # print(tmp)
         tmp = re.sub(r'[\(\[\{（【][^)）】]*[\)\]\{\】\）]\s?', '', tmp)
         tmp = re.sub(r'[^\w\s]', '', tmp)
-        # 处理空标题
         if len(tmp) == 0:
             continue
 
-        # 搜索引擎模式，在精确模式的基础上，对长词再次切分，提高召回率，适合用于搜索引擎分词。
         seg_list = cut_for_search(tmp)
         sig_list = []
         tag = 0
@@ -170,7 +165,6 @@ def insert_title():
                 max_num = 0
             else:
                 max_num += 1
-            # print(max_num, j, i.book_id)
             session.execute(
                 "INSERT into search_title(search_id, title, id) VALUES (%d, '%s', %d)"
                 % (max_num, j, int(i.id)))
@@ -187,12 +181,8 @@ def insert_book_intro():
     for i in row:
         tmp = i.book_intro
         if tmp != None:
-            # print(tmp)
-            # 采用textrank进行分词
+            # textrank分词
             keywords_textrank = jieba.analyse.textrank(tmp)
-            # print(keywords_textrank)
-            # keywords_tfidf = jieba.analyse.extract_tags(tmp)
-            # print(keywords_tfidf)
             for j in keywords_textrank:
                 max_num = session.execute(
                     "SELECT MAX(search_id) FROM search_book_intro WHERE book_intro = '%s';"
@@ -202,7 +192,6 @@ def insert_book_intro():
                     max_num = 0
                 else:
                     max_num += 1
-                # print(max_num, j, i.book_id)
                 session.execute(
                     "INSERT into search_book_intro(search_id, book_intro, id) VALUES (%d, '%s', %d)"
                     % (max_num, j, int(i.id)))

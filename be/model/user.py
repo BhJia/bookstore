@@ -186,6 +186,7 @@ class User(db_conn.DBConn):
                 Search_author.search_id <= 10 * page - 1).all()
             if records is None:
                 return error.error_cannot_find_book()
+
             for row in records:
                 title = row.title
                 print(title)
@@ -268,16 +269,9 @@ class User(db_conn.DBConn):
         try:
             ret = []
             page = int(page)
-            # records = self.session.execute(
-            #     " SELECT title,book.author,publisher,book_intro,tags,picture "
-            #     "FROM book WHERE book_id in "
-            #     "(select book_id from search_author where author='%s') and "
-            #     "book_id in (select book_id from store where store_id='%s')"
-            #     "LIMIT 10 OFFSET %d" % (author, store_id, 10 * page - 10)).fetchall()  # 约对"小说"+"store_id=x"约0.09s storeid时间忽略不计
-            records = self.session.query(book).join(Search_author, Search_author.id == book.id).join(store,store.store_id == store_id).filter(
-                Search_author.author == author,
-                store.store_id == store_id
-            ).limit(10).offset(10*page-1).all()
+            records = self.session.query(book).join(Search_author, Search_author.id == book.id).join(store,
+                                                                                                     store.store_id == store_id).filter(
+                Search_author.author == author, store.store_id == store_id).limit(10).offset(10 * page - 1).all()
             if records is None:
                 return error.error_cannot_find_book()
             for row in records:
@@ -301,18 +295,12 @@ class User(db_conn.DBConn):
             return 530, "{}".format(str(e))
         return 200, "ok"
 
-    def search_book_intro_in_store(self, book_intro:str,store_id:str,page:str)-> (int,[dict]):
+    def search_book_intro_in_store(self, book_intro: str, store_id: str, page: str) -> (int, [dict]):
         try:
             ret = []
             page = int(page)
-            # records = self.session.execute(
-            #     " SELECT title,book.author,publisher,book_intro,tags,picture "
-            #     "FROM book WHERE book_id in "
-            #     "(select book_id from search_author where author='%s') and "
-            #     "book_id in (select book_id from store where store_id='%s')"
-            #     "LIMIT 10 OFFSET %d" % (author, store_id, 10 * page - 10)).fetchall()  # 约对"小说"+"store_id=x"约0.09s storeid时间忽略不计
             records = self.session.query(book).join(Search_book_intro, Search_book_intro.id == book.id).join(store,
-                                                                                                     store.store_id == store_id).filter(
+                                                                                                             store.store_id == store_id).filter(
                 Search_book_intro.book_intro == book_intro,
                 store.store_id == store_id
             ).limit(10).offset(10 * page - 1).all()
@@ -343,14 +331,8 @@ class User(db_conn.DBConn):
         try:
             ret = []
             page = int(page)
-            # records = self.session.execute(
-            #     " SELECT title,book.author,publisher,book_intro,tags,picture "
-            #     "FROM book WHERE book_id in "
-            #     "(select book_id from search_author where author='%s') and "
-            #     "book_id in (select book_id from store where store_id='%s')"
-            #     "LIMIT 10 OFFSET %d" % (author, store_id, 10 * page - 10)).fetchall()  # 约对"小说"+"store_id=x"约0.09s storeid时间忽略不计
             records = self.session.query(book).join(Search_title, Search_title.id == book.id).join(store,
-                                                                                                     store.store_id == store_id).filter(
+                                                                                                   store.store_id == store_id).filter(
                 Search_title.title == title,
                 store.store_id == store_id
             ).limit(10).offset(10 * page - 1).all()
