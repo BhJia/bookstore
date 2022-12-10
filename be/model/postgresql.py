@@ -75,7 +75,7 @@ class store(Base):
 class new_order(Base):
     __tablename__ = 'new_order'
     order_id = Column(Text, primary_key=True, index=True)
-    user_id = Column(Text, nullable=False)
+    user_id = Column(Text,nullable=False)
     store_id = Column(Text, nullable=False)
     price = Column(Integer, nullable=False)  # 取消订单后返还金额
     status = Column(Text, nullable=False)
@@ -144,6 +144,6 @@ def deleteTables():
 
 
 if __name__ == '__main__':
-    # deleteTables()
+    deleteTables()
     createTable()
     insertData()

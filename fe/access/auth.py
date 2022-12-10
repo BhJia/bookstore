@@ -53,3 +53,35 @@ class Auth:
         url = urljoin(self.url_prefix, "search_author")
         r = requests.post(url, json=json)
         return r.status_code
+
+    def search_book_intro(self, book_intro: str, page: str) -> int:
+        json = {"book_intro": book_intro, "page": page}
+        url = urljoin(self.url_prefix, "search_book_intro")
+        r = requests.post(url, json=json)
+        return r.status_code
+
+
+    def search_title(self, title: str, page: str) -> int:
+        json = {"title": title, "page": page}
+        url = urljoin(self.url_prefix, "search_title")
+        r = requests.post(url, json=json)
+        return r.status_code
+
+    def search_author_in_store(self, author: str, store_id: str, page: str) -> int:
+        json = {"author": author, "store_id": store_id, "page": page}
+        url = urljoin(self.url_prefix, "search_author_in_store")
+        r = requests.post(url, json=json)
+        return r.status_code
+
+    def search_book_intro_in_store(self, book_intro: str, store_id: str, page: str) -> int:
+        json = {"book_intro": book_intro, "store_id": store_id, "page": page}
+        url = urljoin(self.url_prefix, "search_book_intro_in_store")
+        r = requests.post(url, json=json)
+        return r.status_code
+
+
+    def search_title_in_store(self, title: str, store_id: str, page: str) -> int:
+        json = {"title": title, "store_id": store_id, "page": page}
+        url = urljoin(self.url_prefix, "search_title_in_store")
+        r = requests.post(url, json=json)
+        return r.status_code

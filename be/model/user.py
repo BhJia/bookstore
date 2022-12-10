@@ -180,45 +180,195 @@ class User(db_conn.DBConn):
         try:
 
             ret = []
-
-            # records = self.session.execute(
-            #    " SELECT title,book.author,publisher,book_intro,tags,picture "
-            #    "FROM book WHERE id in "
-            #    "(select id from search_author where author='%s' and search_id BETWEEN %d and %d)" % (
-            #    author, 10 * page - 10, 10 * page - 1)).fetchall()
-            print("1")
-            id1 = self.session.query(Search_author).all()
-            print(2)
             page = int(page)
             records = self.session.query(book).join(Search_author, Search_author.id == book.id).filter(
                 Search_author.author == author, Search_author.search_id >= 10 * page - 10,
                 Search_author.search_id <= 10 * page - 1).all()
-            print(3)
-            #
+            if records is None:
+                return error.error_cannot_find_book()
+            for row in records:
+                title = row.title
+                print(title)
 
-            #
-            #
-            #
-            #
-            # if records is None:
-            #     return error.error_cannot_find_book()
-            #
-            #
-            # for row in records:
-            #     title = row.title
-            #     print(title)
-            #
-            #     author1 = row.author
-            #     print(author1)
-            #
-            #     publisher = row.publisher
-            #     book_intro = row.book_intro
-            #     tags = row.tags
-            #     ret.append(
-            #         {'title': title, 'author': author1, 'publisher': publisher,
-            #          'book_intro': book_intro,
-            #          'tags': tags, 'picture': ''})
+                author1 = row.author
+                print(author1)
 
+                publisher = row.publisher
+                book_intro = row.book_intro
+                tags = row.tags
+                ret.append(
+                    {'title': title, 'author': author1, 'publisher': publisher,
+                     'book_intro': book_intro,
+                     'tags': tags, 'picture': ''})
+
+        except SQLAlchemyError as e:
+            print("{}".format(str(e)))
+            return 528, "{}".format(str(e))
+        except BaseException as e:
+            print("{}".format(str(e)))
+            return 530, "{}".format(str(e))
+        return 200, "ok"
+
+    def search_book_intro(self, book_intro: str, page: int) -> (int, [dict]):
+        try:
+
+            ret = []
+            page = int(page)
+            records = self.session.query(book).join(Search_book_intro, Search_book_intro.id == book.id).filter(
+                Search_book_intro.book_intro == book_intro, Search_book_intro.search_id >= 10 * page - 10,
+                Search_book_intro.search_id <= 10 * page - 1).all()
+            if records is None:
+                return error.error_cannot_find_book()
+            for row in records:
+                title = row.title
+                author1 = row.author
+                publisher = row.publisher
+                book_intro = row.book_intro
+                tags = row.tags
+                ret.append(
+                    {'title': title, 'author': author1, 'publisher': publisher,
+                     'book_intro': book_intro,
+                     'tags': tags, 'picture': ''})
+        except SQLAlchemyError as e:
+            print("{}".format(str(e)))
+            return 528, "{}".format(str(e))
+        except BaseException as e:
+            print("{}".format(str(e)))
+            return 530, "{}".format(str(e))
+        return 200, "ok"
+
+    def search_title(self, title: str, page: str) -> (int, [dict]):
+        try:
+            ret = []
+            page = int(page)
+            records = self.session.query(book).join(Search_title, Search_title.id == book.id).filter(
+                Search_title.title == title, Search_title.search_id >= 10 * page - 10,
+                Search_title.search_id <= 10 * page - 1).all()
+            if records is None:
+                return error.error_cannot_find_book()
+            for row in records:
+                title = row.title
+                author1 = row.author
+                publisher = row.publisher
+                book_intro = row.book_intro
+                tags = row.tags
+                ret.append(
+                    {'title': title, 'author': author1, 'publisher': publisher,
+                     'book_intro': book_intro,
+                     'tags': tags, 'picture': ''})
+        except SQLAlchemyError as e:
+            print("{}".format(str(e)))
+            return 528, "{}".format(str(e))
+        except BaseException as e:
+            print("{}".format(str(e)))
+            return 530, "{}".format(str(e))
+        return 200, "ok"
+
+    def search_author_in_store(self, author: str, store_id: str, page: str) -> (int, [dict]):
+        try:
+            ret = []
+            page = int(page)
+            # records = self.session.execute(
+            #     " SELECT title,book.author,publisher,book_intro,tags,picture "
+            #     "FROM book WHERE book_id in "
+            #     "(select book_id from search_author where author='%s') and "
+            #     "book_id in (select book_id from store where store_id='%s')"
+            #     "LIMIT 10 OFFSET %d" % (author, store_id, 10 * page - 10)).fetchall()  # 约对"小说"+"store_id=x"约0.09s storeid时间忽略不计
+            records = self.session.query(book).join(Search_author, Search_author.id == book.id).join(store,store.store_id == store_id).filter(
+                Search_author.author == author,
+                store.store_id == store_id
+            ).limit(10).offset(10*page-1).all()
+            if records is None:
+                return error.error_cannot_find_book()
+            for row in records:
+                title = row.title
+                author1 = row.author
+                publisher = row.publisher
+                book_intro = row.book_intro
+                tags = row.tags
+                ret.append(
+                    {'title': title, 'author': author1, 'publisher': publisher,
+                     'book_intro': book_intro,
+                     'tags': tags, 'picture': ''})
+                return 200, ret
+            else:
+                return 200, []
+        except SQLAlchemyError as e:
+            print("{}".format(str(e)))
+            return 528, "{}".format(str(e))
+        except BaseException as e:
+            print("{}".format(str(e)))
+            return 530, "{}".format(str(e))
+        return 200, "ok"
+
+    def search_book_intro_in_store(self, book_intro:str,store_id:str,page:str)-> (int,[dict]):
+        try:
+            ret = []
+            page = int(page)
+            # records = self.session.execute(
+            #     " SELECT title,book.author,publisher,book_intro,tags,picture "
+            #     "FROM book WHERE book_id in "
+            #     "(select book_id from search_author where author='%s') and "
+            #     "book_id in (select book_id from store where store_id='%s')"
+            #     "LIMIT 10 OFFSET %d" % (author, store_id, 10 * page - 10)).fetchall()  # 约对"小说"+"store_id=x"约0.09s storeid时间忽略不计
+            records = self.session.query(book).join(Search_book_intro, Search_book_intro.id == book.id).join(store,
+                                                                                                     store.store_id == store_id).filter(
+                Search_book_intro.book_intro == book_intro,
+                store.store_id == store_id
+            ).limit(10).offset(10 * page - 1).all()
+            if records is None:
+                return error.error_cannot_find_book()
+            for row in records:
+                title = row.title
+                author1 = row.author
+                publisher = row.publisher
+                book_intro = row.book_intro
+                tags = row.tags
+                ret.append(
+                    {'title': title, 'author': author1, 'publisher': publisher,
+                     'book_intro': book_intro,
+                     'tags': tags, 'picture': ''})
+                return 200, ret
+            else:
+                return 200, []
+        except SQLAlchemyError as e:
+            print("{}".format(str(e)))
+            return 528, "{}".format(str(e))
+        except BaseException as e:
+            print("{}".format(str(e)))
+            return 530, "{}".format(str(e))
+        return 200, "ok"
+
+    def search_title_in_store(self, title: str, store_id: str, page: str) -> (int, [dict]):
+        try:
+            ret = []
+            page = int(page)
+            # records = self.session.execute(
+            #     " SELECT title,book.author,publisher,book_intro,tags,picture "
+            #     "FROM book WHERE book_id in "
+            #     "(select book_id from search_author where author='%s') and "
+            #     "book_id in (select book_id from store where store_id='%s')"
+            #     "LIMIT 10 OFFSET %d" % (author, store_id, 10 * page - 10)).fetchall()  # 约对"小说"+"store_id=x"约0.09s storeid时间忽略不计
+            records = self.session.query(book).join(Search_title, Search_title.id == book.id).join(store,
+                                                                                                     store.store_id == store_id).filter(
+                Search_title.title == title,
+                store.store_id == store_id
+            ).limit(10).offset(10 * page - 1).all()
+            if records is None:
+                return error.error_cannot_find_book()
+            for row in records:
+                title = row.title
+                author1 = row.author
+                publisher = row.publisher
+                book_intro = row.book_intro
+                tags = row.tags
+                ret.append(
+                    {'title': title, 'author': author1, 'publisher': publisher,
+                     'book_intro': book_intro,
+                     'tags': tags, 'picture': ''})
+                return 200, ret
+            else:
+                return 200, []
         except SQLAlchemyError as e:
             print("{}".format(str(e)))
             return 528, "{}".format(str(e))
