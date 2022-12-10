@@ -17,13 +17,18 @@ class TestSearch:
         #self.tags = "test_tags_{}".format(str(uuid.uuid1()))#random.choice(["小说","励志"])
         #self.title = "test_title_{}".format(str(uuid.uuid1()))#random.choice(["很","在"])
         #self.store_id = "test_store_id_{}".format(str(uuid.uuid1()))
-        self.page = random.randint(1,2)
 
         yield
 
     def test_search(self):
+        print("........")
+        assert self.auth.search_author("三毛", "1") == 200
+        print("********")
+        # assert self.auth.search_author("帆","3") == 200
+        # assert self.auth.search_author("寒", "5") == 200
+        # assert self.auth.search_author("晨", "7") == 200
+        # assert self.auth.search_author("6", "9") == 200
 
-        assert self.auth.search_author("阿", self.page) == 200
         #assert self.auth.search_book_intro(self.book_intro, self.page) == 200
         #assert self.auth.search_tags(self.tags, self.page) == 200
         #assert self.auth.search_title(self.title, self.page) == 200

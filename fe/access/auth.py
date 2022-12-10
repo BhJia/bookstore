@@ -48,7 +48,7 @@ class Auth:
         r = requests.post(url, json=json)
         return r.status_code
 
-    def search_author(self, author: str, page: int) -> int:
+    def search_author(self, author: str, page: str) -> int:
         json = {"author": author, "page": page}
         url = urljoin(self.url_prefix, "search_author")
         r = requests.post(url, json=json)

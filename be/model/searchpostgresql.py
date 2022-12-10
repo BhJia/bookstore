@@ -226,8 +226,8 @@ if __name__ == "__main__":
     # 创建数据库
 
     # 插入表
-    #delete()
-    #deleteTables()
+    # delete()
+    # deleteTables()
     start = datetime.datetime.now()
 
     insert_author()

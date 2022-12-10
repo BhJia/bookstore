@@ -5,9 +5,10 @@ import sqlite3 as sqlite
 from be.model import error
 from be.model import db_conn
 from be.model.postgresql import book, store, user, user_store
-from be.model.searchpostgresql import Search_book_intro,Search_title, Search_author
+from be.model.searchpostgresql import Search_book_intro, Search_title, Search_author
 from sqlalchemy.exc import SQLAlchemyError
 import sqlalchemy
+
 
 def jwt_encode(user_id: str, terminal: str) -> str:
     encoded = jwt.encode(
@@ -175,35 +176,53 @@ class User(db_conn.DBConn):
             return 530, "{}".format(str(e))
         return 200, "ok"
 
-    def search_author(self, author: str, page: int) :  # 200,'ok',list[{str,str,str,str,list,bytes}]
-        ret = []
+    def search_author(self, author: str, page: str):  # 200,'ok',list[{str,str,str,str,list,bytes}]
+        try:
 
-        #records = self.session.execute(
-        #    " SELECT title,book.author,publisher,book_intro,tags,picture "
-        #    "FROM book WHERE id in "
-        #    "(select id from search_author where author='%s' and search_id BETWEEN %d and %d)" % (
-        #    author, 10 * page - 10, 10 * page - 1)).fetchall()
+            ret = []
 
-        id1 = self.session.query(Search_author).all()
-        for i in id1:
-            print(i.author)
+            # records = self.session.execute(
+            #    " SELECT title,book.author,publisher,book_intro,tags,picture "
+            #    "FROM book WHERE id in "
+            #    "(select id from search_author where author='%s' and search_id BETWEEN %d and %d)" % (
+            #    author, 10 * page - 10, 10 * page - 1)).fetchall()
+            print("1")
+            id1 = self.session.query(Search_author).all()
+            print(2)
+            page = int(page)
+            records = self.session.query(book).join(Search_author, Search_author.id == book.id).filter(
+                Search_author.author == author, Search_author.search_id >= 10 * page - 10,
+                Search_author.search_id <= 10 * page - 1).all()
+            print(3)
+            #
 
-        records = self.session.query(book).filter(book.id.in_(id1)).all()
-        #for i in records:
-            #print(book.name)
-        if len(records) != 0:
-            for i in range(len(records)):
-                record = records[i]
-                title = record[0]
-                author_ = record[1]
-                publisher = record[2]
-                book_intro = record[3]
-                tags = record[4]
-                ret.append(
-                        {'title': title, 'author': author_, 'publisher': publisher,
-                         'book_intro': book_intro,
-                         'tags': tags, 'picture': ''})
+            #
+            #
+            #
+            #
+            # if records is None:
+            #     return error.error_cannot_find_book()
+            #
+            #
+            # for row in records:
+            #     title = row.title
+            #     print(title)
+            #
+            #     author1 = row.author
+            #     print(author1)
+            #
+            #     publisher = row.publisher
+            #     book_intro = row.book_intro
+            #     tags = row.tags
+            #     ret.append(
+            #         {'title': title, 'author': author1, 'publisher': publisher,
+            #          'book_intro': book_intro,
+            #          'tags': tags, 'picture': ''})
 
-            return 200, ret
-        else:
-            return 200
+        except SQLAlchemyError as e:
+            print("{}".format(str(e)))
+            return 528, "{}".format(str(e))
+        except BaseException as e:
+            print("{}".format(str(e)))
+            return 530, "{}".format(str(e))
+        return 200, "ok"

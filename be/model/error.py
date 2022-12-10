@@ -10,7 +10,7 @@ error_code = {
     518: "invalid order id {}",
     519: "not sufficient funds, order id {}",
     520: "order already paid, order id{}",
-    521: "cannot find books according to the search content, buyer id{}",
+    521: "cannot find books according to the search content",
     522: "",
     523: "",
     524: "",
@@ -71,14 +71,15 @@ def error_order_paid(order_id):
     return 520, error_code[520].format(order_id)
 
 
-def error_cannot_find_book(buyer_id):
-    print(error_code[521].format(buyer_id))
-    return 521, error_code[521].format(buyer_id)
+def error_cannot_find_book():
+    print(error_code[521].format())
+    return 521, error_code[521].format()
 
 
 def error_authorization_fail():
     print(error_code[401])
     return 401, error_code[401]
+
 
 
 def error_and_message(code, message):

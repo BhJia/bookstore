@@ -1,4 +1,4 @@
-from sqlalchemy import Column, create_engine, Integer, Text, LargeBinary, ForeignKey, DateTime
+from sqlalchemy import Column, create_engine, Integer, Text, LargeBinary, ForeignKey, DateTime,func,Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import sqlite3 as sqlite
@@ -42,6 +42,7 @@ class book(Base):
     picture = Column(LargeBinary, nullable=True)
 
 
+
 # 用户表
 class user(Base):
     __tablename__ = 'user'
@@ -74,8 +75,8 @@ class store(Base):
 class new_order(Base):
     __tablename__ = 'new_order'
     order_id = Column(Text, primary_key=True, index=True)
-    user_id = Column(Text, ForeignKey('user.user_id'), nullable=False)
-    store_id = Column(Text, ForeignKey('user_store.store_id'), nullable=False)
+    user_id = Column(Text, nullable=False)
+    store_id = Column(Text, nullable=False)
     price = Column(Integer, nullable=False)  # 取消订单后返还金额
     status = Column(Text, nullable=False)
     order_time = Column(DateTime, nullable=False)
@@ -86,8 +87,8 @@ class new_order(Base):
 # 订单细节表
 class new_order_detail(Base):
     __tablename__ = 'new_order_detail'
-    order_id = Column(Text, ForeignKey('new_order.order_id'), primary_key=True, nullable=False, index=True)
-    book_id = Column(Integer, ForeignKey('book.id'), primary_key=True, nullable=False)
+    order_id = Column(Text, primary_key=True, nullable=False, index=True)
+    book_id = Column(Integer, primary_key=True, nullable=False)
     count = Column(Integer, nullable=False)
     price = Column(Integer, nullable=False)
 
@@ -128,6 +129,7 @@ def insertData():
     session.close()
 
 
+
 def deleteAllData():
     session = DbSession()  # 创建会话
     delete_user = session.query(user).delete()
@@ -142,6 +144,6 @@ def deleteTables():
 
 
 if __name__ == '__main__':
-    deleteTables()
+    # deleteTables()
     createTable()
     insertData()
